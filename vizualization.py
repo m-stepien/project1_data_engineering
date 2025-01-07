@@ -70,7 +70,7 @@ def data_distribution(data, name=None):
 
 def data_distribution_numerical_data(data, name):
     plt.boxplot(x=data)
-    plt.title('Boxplot wartości dla każdej kategorii', fontsize=14)
+    plt.title('Rozkład zmiennych', fontsize=14)
     plt.ylabel('Wartości', fontsize=12)
     plt.xlabel(name, fontsize=12)
     plt.show()

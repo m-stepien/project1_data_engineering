@@ -7,6 +7,7 @@ print(df)
 numeric_values = df.select_dtypes(include=[np.number])
 selected_columns = numeric_values.iloc[:, :25]
 
+
 # show_histogram(numeric_values)
 # show_scatter_plot(df["Age"], df["Income"], x_name="Age", y_name="Income")
 # corr_matrix = selected_columns.corr()
@@ -25,14 +26,14 @@ selected_columns = numeric_values.iloc[:, :25]
 # df_with_nan['E'] = np.nan
 # show_missing_data(df_with_nan)
 
-np.random.seed(42)
-data = {
-    'Kategoria': np.random.choice(['A', 'B', 'C', 'D'], size=100),
-    'Wartości': np.random.randint(1, 100, size=100)
-}
-
-df_categorical = pd.DataFrame(data)
-df_categorical['Kategoria'] = df_categorical['Kategoria'].replace('A', 'E')
-# data_distribution(df_categorical["Kategoria"])
-print(df_categorical["Wartości"])
-data_distribution(df_categorical["Wartości"], "Wartości")
+# np.random.seed(42)
+# data = {
+#     'Kategoria': np.random.choice(['A', 'B', 'C', 'D'], size=100),
+#     'Wartości': np.random.randint(1, 100, size=100)
+# }
+#
+# df_categorical = pd.DataFrame(data)
+# df_categorical['Kategoria'] = df_categorical['Kategoria'].replace('A', 'E')
+# # data_distribution(df_categorical["Kategoria"])
+# print(df_categorical["Wartości"])
+# data_distribution(df_categorical["Wartości"], "Wartości")

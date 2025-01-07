@@ -1,6 +1,8 @@
 import matplotlib
 import matplotlib.pyplot as plt
 import seaborn as sns
+import missingno as msno
+import numpy as np
 
 
 def show_histogram(data):
@@ -46,3 +48,33 @@ def show_heatmap(corr_matrix):
     sns.heatmap(corr_matrix, annot=annot, cmap='coolwarm', fmt=fmt, annot_kws={"size": font_size})
     plt.title('Macierz korelacji', fontsize=14)
     plt.show()
+
+
+# Analiza braków danych (NaN) oraz rozkład zmiennych.
+def show_missing_data(data):
+    plt.figure(constrained_layout=True)
+    missing_percent = (data.isnull().sum() / len(data)) * 100
+    plt.ylim(0, 100)
+    plt.yticks(np.arange(0, 101, 10))
+    plt.title('Procent brakujących wartości dla każdej kolumny', fontsize=14)
+    plt.xlabel('Kolumny', fontsize=12)
+    plt.ylabel('Procent braków danych', fontsize=12)
+    missing_percent.plot(kind='bar', color='red')
+    plt.show()
+
+
+def data_distribution(data):
+    if data.iloc[:, 0].dtype in ['int64', 'float64']:
+        data_distribution_numerical_data(data)
+    else:
+        data_distribution_categorical_data(data)
+
+
+def data_distribution_numerical_data(data):
+    pass
+
+
+def data_distribution_categorical_data(data):
+    category_counts = data.iloc[:, 0].value_counts()
+
+

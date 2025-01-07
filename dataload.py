@@ -4,8 +4,6 @@ import numpy as np
 EXCEL_EXTENSIONS = ["xls", "xlsx", "xlsm", "xlsb", "odf", "ods", "odt"] #atributes sheet_name header
 CSV_EXTENSIONS = ["csv", "tsv"] #atributes sep decimal
 JSON_EXTENSIONS = ["json"] #atributes empty
-EXCEL_ATRIBUTES_LIST = []
-JSON_ATRIBUTES_LIST = []
 CSV_ATRIBUTES_LIST = ["sep", "decimal", "index_col", "skiprows", "header"]
 DEFAULT_ATRIBUTES = {"csv": {"sep": ",", "decimal": ".", "index_col": None, "skiprows": None,
                              "header": "infer", "usecols": None}}

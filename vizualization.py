@@ -1,7 +1,6 @@
 import matplotlib
 import matplotlib.pyplot as plt
 import seaborn as sns
-import missingno as msno
 import numpy as np
 
 
@@ -50,7 +49,6 @@ def show_heatmap(corr_matrix):
     plt.show()
 
 
-# Analiza braków danych (NaN) oraz rozkład zmiennych.
 def show_missing_data(data):
     plt.figure(constrained_layout=True)
     missing_percent = (data.isnull().sum() / len(data)) * 100
@@ -63,18 +61,26 @@ def show_missing_data(data):
     plt.show()
 
 
-def data_distribution(data):
-    if data.iloc[:, 0].dtype in ['int64', 'float64']:
-        data_distribution_numerical_data(data)
+def data_distribution(data, name=None):
+    if data.dtypes.kind in ['i', 'u', 'f', 'c']:
+        data_distribution_numerical_data(data, name)
     else:
         data_distribution_categorical_data(data)
 
 
-def data_distribution_numerical_data(data):
-    pass
+def data_distribution_numerical_data(data, name):
+    plt.boxplot(x=data)
+    plt.title('Boxplot wartości dla każdej kategorii', fontsize=14)
+    plt.ylabel('Wartości', fontsize=12)
+    plt.xlabel(name, fontsize=12)
+    plt.show()
 
 
 def data_distribution_categorical_data(data):
-    category_counts = data.iloc[:, 0].value_counts()
-
-
+    category_counts = data.value_counts()
+    plt.figure(constrained_layout=True)
+    category_counts.plot(kind='bar', color='gray', alpha=0.8)
+    plt.title('Liczba wystąpień kategorii', fontsize=14)
+    plt.xlabel('Kategorie', fontsize=12)
+    plt.ylabel('Liczba wystąpień', fontsize=12)
+    plt.show()

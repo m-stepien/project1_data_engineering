@@ -1,5 +1,6 @@
 import matplotlib
 import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 import seaborn as sns
 import numpy as np
 
@@ -84,3 +85,26 @@ def data_distribution_categorical_data(data):
     plt.xlabel('Kategorie', fontsize=12)
     plt.ylabel('Liczba wystąpień', fontsize=12)
     plt.show()
+
+
+def show_regresion_real_predicted(y, y_pred):
+    plt.figure(constrained_layout=True)
+    plt.scatter(y, y_pred, alpha=0.7, label='Rzeczywiste wartości vs przewidywane')
+    plt.plot([min(y), max(y)], [min(y), max(y)], color='red', label='Idealne dopasowanie')
+    plt.xlabel('Wartości rzeczywiste')
+    plt.ylabel('Wartości przewidywane')
+    plt.title('Rzeczywiste vs Przewidywane')
+    plt.legend()
+    plt.grid(alpha=0.3)
+    plt.show()
+
+
+def show_vizualization_classification(y, y_pred):
+    cm = confusion_matrix(y, y_pred)
+    labels = np.unique(np.concatenate((y, y_pred)))
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=labels)
+    disp.plot(cmap='Blues', values_format='d')
+    plt.title('Macierz Pomyłek')
+    plt.show()
+
+

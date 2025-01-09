@@ -43,3 +43,6 @@ def add_default_param(extension_category, atributes):
         atributes[param] = DEFAULT_ATRIBUTES.get("csv").get(param)
     return atributes
 
+def get_atributes_list_for_file_extension(extension):
+    return DEFAULT_ATRIBUTES.get(extension).keys()
+

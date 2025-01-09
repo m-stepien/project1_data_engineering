@@ -50,6 +50,5 @@ def split_to_test_training(x, y, test_size=0.3, random_state=42):
 
 def split_to_features_and_labels(df, features_name_list, labels_name):
     X = df[features_name_list]
-    y =  df[labels_name]
+    y = df[labels_name]
     return X, y
-

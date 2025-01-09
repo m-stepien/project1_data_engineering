@@ -1,8 +1,20 @@
-from dataload import load_from_file
+from dataload import load_from_file, get_atributes_list_for_file_extension
 from vizualization import show_histogram, show_scatter_plot, show_heatmap, show_missing_data, data_distribution
 from statistical_summary import calc_corr_for_all, split_df_to_categorical_and_numerical
 import pandas as pd
 import numpy as np
+
+
+def file_name_screen():
+    filename = input("Podaj nazwę pliku:\t")
+    yn = input("Czy chcesz dodać niestandardowe parametry do otwarcia pliku")
+    if yn == 'y':
+        atributes = get_atributes_list_for_file_extension(filename.split(".")[-1])
+        for idx, atribut in enumerate(atributes):
+            print(f"{idx}. {atribut}")
+
+
+file_name_screen()
 df = load_from_file("resource/data.csv", {})
 numeric_values = df.select_dtypes(include=[np.number])
 selected_columns = numeric_values.iloc[:, :25]

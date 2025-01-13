@@ -8,6 +8,7 @@ CSV_ATRIBUTES_LIST = ["sep", "decimal", "index_col", "skiprows", "header"]
 DEFAULT_ATRIBUTES = {"csv": {"sep": ",", "decimal": ".", "index_col": None, "skiprows": None,
                              "header": "infer", "usecols": None}}
 
+
 def load_from_file(filename: str, atributes: dict):
     extension = filename.split(".")[-1]
     dataframe = None

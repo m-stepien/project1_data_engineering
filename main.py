@@ -7,20 +7,41 @@ import numpy as np
 
 def file_name_screen():
     filename = input("Podaj nazwę pliku:\t")
-    yn = input("Czy chcesz dodać niestandardowe parametry do otwarcia pliku")
+    return filename
+
+
+def additional_parameters(fname):
+    personal_parameters = {}
+    atributes_keys = get_atributes_list_for_file_extension(fname.split(".")[-1])
+    yn = input("Czy chcesz dodać niestandardowe parametry do otwarcia pliku (y/n)\t")
     if yn == 'y':
-        atributes = get_atributes_list_for_file_extension(filename.split(".")[-1])
-        for idx, atribut in enumerate(atributes):
-            print(f"{idx}. {atribut}")
+        choice = None
+        while choice != "0":
+            for idx, key in enumerate(atributes_keys):
+                print(f"{idx+1}. {key}")
+            print("0. Kontynuuj")
+            choice = input()
+            if choice != "0":
+                value = input("Podaj wartość wybranego parametru:\t")
+                personal_parameters[list(atributes_keys)[int(choice)-1]] = value
+            print(personal_parameters)
+    return personal_parameters
 
 
-file_name_screen()
-df = load_from_file("resource/data.csv", {})
-numeric_values = df.select_dtypes(include=[np.number])
-selected_columns = numeric_values.iloc[:, :25]
-splited = split_df_to_categorical_and_numerical(df)
+def exploration_menu():
+    print("1. Histogram\n2. Wykres punktowy \n3. Korelacja między zmiennymi\n4.Analiza braków danych\n5. Rozkład zmiennych\n"
+          "6. Podsumowanie statystyczne")
+    choice = input()
+    return choice
+
+def data_preparation_menu():
 
 
+
+def main():
+    filename = file_name_screen()
+    atributes = additional_parameters(filename)
+    # load_from_file(filename, atributes)
 
 # show_histogram(numeric_values)
 # show_scatter_plot(df["Age"], df["Income"], x_name="Age", y_name="Income")
@@ -51,3 +72,6 @@ splited = split_df_to_categorical_and_numerical(df)
 # # data_distribution(df_categorical["Kategoria"])
 # print(df_categorical["Wartości"])
 # data_distribution(df_categorical["Wartości"], "Wartości")
+
+if __name__ == '__main__':
+    main()

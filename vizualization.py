@@ -5,12 +5,16 @@ import seaborn as sns
 import numpy as np
 
 
-def show_histogram(data):
+def show_histogram(data, column_name):
+    plt.close('all')
+    plt.figure(figsize=(8, 5))
     plt.hist(data, bins=100, density=True, alpha=0.5, histtype='stepfilled')
+    plt.title(f"Histogram for {column_name}")
     plt.show()
 
 
 def show_scatter_plot(x, y, x_name, y_name):
+    name = f"{x_name} {y_name}"
     plt.figure(figsize=(8, 6))
     plt.scatter(x, y, alpha=0.7)
     plt.title(name, fontsize=14)
@@ -66,10 +70,11 @@ def data_distribution(data, name=None):
     if data.dtypes.kind in ['i', 'u', 'f', 'c']:
         data_distribution_numerical_data(data, name)
     else:
-        data_distribution_categorical_data(data)
+        data_distribution_categorical_data(data, name)
 
 
 def data_distribution_numerical_data(data, name):
+    plt.figure(constrained_layout=True)
     plt.boxplot(x=data)
     plt.title('Rozkład zmiennych', fontsize=14)
     plt.ylabel('Wartości', fontsize=12)
@@ -77,11 +82,11 @@ def data_distribution_numerical_data(data, name):
     plt.show()
 
 
-def data_distribution_categorical_data(data):
+def data_distribution_categorical_data(data, name):
     category_counts = data.value_counts()
     plt.figure(constrained_layout=True)
     category_counts.plot(kind='bar', color='gray', alpha=0.8)
-    plt.title('Liczba wystąpień kategorii', fontsize=14)
+    plt.title(f'Liczba wystąpień kategorii w {name}', fontsize=14)
     plt.xlabel('Kategorie', fontsize=12)
     plt.ylabel('Liczba wystąpień', fontsize=12)
     plt.show()

@@ -18,30 +18,133 @@ def additional_parameters(fname):
         choice = None
         while choice != "0":
             for idx, key in enumerate(atributes_keys):
-                print(f"{idx+1}. {key}")
+                print(f"{idx + 1}. {key}")
             print("0. Kontynuuj")
             choice = input()
             if choice != "0":
                 value = input("Podaj wartość wybranego parametru:\t")
-                personal_parameters[list(atributes_keys)[int(choice)-1]] = value
+                personal_parameters[list(atributes_keys)[int(choice) - 1]] = value
             print(personal_parameters)
     return personal_parameters
 
 
 def exploration_menu():
-    print("1. Histogram\n2. Wykres punktowy \n3. Korelacja między zmiennymi\n4.Analiza braków danych\n5. Rozkład zmiennych\n"
-          "6. Podsumowanie statystyczne")
+    print(
+        "1. Histogram\n2. Wykres punktowy \n3. Korelacja między zmiennymi\n4.Analiza braków danych\n5. Rozkład zmiennych\n"
+        "6. Podsumowanie statystyczne")
     choice = input()
     return choice
 
-def data_preparation_menu():
+
+def vizualization_menu():
+    print("1. Histogram\n2. Scatter plot\n3. Correlations between variables\n0. Back")
+
+
+def choose_column(columns_name):
+    for idx, column in enumerate(columns_name):
+        print(f"{idx + 1}. {column}")
+    choice = None
+    while choice is None:
+        try:
+            choice = int(input())
+            if 1 <= choice <= len(columns_name):
+                return columns_name[choice - 1]
+            else:
+                print("You must choose from index of columns")
+                choice = None
+        except Exception as e:
+            print("Choice must by a number")
 
 
 
 def main():
     filename = file_name_screen()
     atributes = additional_parameters(filename)
-    # load_from_file(filename, atributes)
+    df = load_from_file(filename, atributes)
+    print(df.head())
+    main_choice = None
+    while main_choice != "0":
+        print(
+            "1. Vizualization\n2. Statistic summary\n3. Data preparation\n4. Model selection\n5. Budowanie modelu\n6. Model evaluation\n"
+            "6. Export results\n0.Exit")
+        main_choice = input()
+        if main_choice == "1":
+            print("1. Histogram\n2. Scatter plot\n3. Correlations between variables\n4. Missing data analysis\n"
+                  "5. Distribution of variables\n 0. Back")
+            visualization_choice = None
+            while visualization_choice != "0":
+                visualization_choice = input()
+                if visualization_choice == "1":
+                    print("Select column")
+                    for index, column in enumerate(df.columns):
+                        print(f"{index + 1}. {column}")
+                    print(f"{len(df.columns) + 1}. SELECT ALL")
+                    print("0. Back")
+                    column_selection = None
+                    while column_selection != "0":
+                        try:
+                            column_selection = int(input())
+                        except Exception as e:
+                            print("choice must be a number")
+                            continue
+                        if column_selection == len(df.columns) + 1:
+                            pass
+                        elif 0 < column_selection <= len(df.columns):
+                            column_name = df.columns[column_selection - 1]
+                            show_histogram(df[column_name], column_name)
+                        elif column_selection == "0":
+                            continue
+                elif visualization_choice == "2":
+                    numerical_columns = df.select_dtypes(exclude=['object', 'category', 'string']).columns.tolist()
+                    column_name_1 = choose_column(numerical_columns)
+                    numerical_columns.remove(column_name_1)
+                    column_name_2 = choose_column(numerical_columns)
+                    show_scatter_plot(df[column_name_1], df[column_name_2], column_name_1, column_name_2)
+                elif visualization_choice == "3":
+                    corr = calc_corr_for_all(df.select_dtypes(exclude=['object', 'category', 'string']))
+                    show_heatmap(corr)
+                elif visualization_choice == "4":
+                    show_missing_data(df)
+                elif visualization_choice == "5":
+                    print("Select column")
+                    for index, column in enumerate(df.columns):
+                        print(f"{index + 1}. {column}")
+                    print("0. Back")
+                    column_selection = None
+                    while column_selection != "0":
+                        try:
+                            column_selection = int(input())
+                        except Exception as e:
+                            print("choice must be a number")
+                            continue
+                        if 0 < column_selection <= len(df.columns):
+                            column_name = df.columns[column_selection - 1]
+                            data_distribution(df[column_name], column_name)
+                        elif column_selection == "0":
+                            continue
+
+                    data_distribution(df["Income"])
+                elif visualization_choice == "0":
+                    continue
+                else:
+                    print("No such option")
+        elif main_choice == "2":
+            pass
+        elif main_choice == "3":
+            pass
+        elif main_choice == "4":
+            pass
+        elif main_choice == "5":
+            pass
+        elif main_choice == "6":
+            pass
+        elif main_choice == "0":
+            continue
+        else:
+            print("Sorry but there is no such option")
+
+    vizualization_menu()
+
 
 # show_histogram(numeric_values)
 # show_scatter_plot(df["Age"], df["Income"], x_name="Age", y_name="Income")

@@ -2,7 +2,7 @@ from dataload import load_from_file, get_atributes_list_for_file_extension
 from vizualization import show_histogram, show_scatter_plot, show_heatmap, show_missing_data, data_distribution
 from statistical_summary import calc_statistic_for_all_columns, calc_corr_for_all, split_df_to_categorical_and_numerical
 from data_preparation import removing_missing_data, imputation_missing_data, data_standardization, data_normalization, \
-    one_hot_encoding, label_encoding
+    one_hot_encoding, label_encoding, split_to_test_training
 import pandas as pd
 import numpy as np
 
@@ -44,6 +44,17 @@ def choose_column(columns_name):
                 choice = None
         except Exception as e:
             print("Choice must by a number")
+
+def select_test_data_percentage():
+    while True:
+        try:
+            percent = float(input("Select percent of data that will test model (0-100): "))
+            if 0 < percent < 100:
+                return percent / 100
+            else:
+                print("Number must be between 0 and 100")
+        except Exception:
+            print("Input must be a number")
 
 
 def main():
@@ -170,11 +181,33 @@ def main():
                         else:
                             print("No such option")
                 elif data_preparation_choice == "3":
+                    columns_names = df.select_dtypes(include=['number']).columns.to_list()
                     x_column_names = []
-                    y_label = choose_column()
+                    print("Select label")
+                    y_label = choose_column(columns_names)
                     x_column_choice_idx = None
-                    columns_names = df.select_dtypes(include=['number']).columns
-
+                    columns_names.remove(y_label)
+                    print("Select features")
+                    while x_column_choice_idx != 0:
+                        for idx, column_name in enumerate(columns_names):
+                            print(f"{idx+1}. {column_name}")
+                        print("0. Continue")
+                        try:
+                            x_column_choice_idx = int(input())
+                        except Exception:
+                            print("Choice must be a number")
+                            continue
+                        if 1 <= x_column_choice_idx <= len(columns_names):
+                            selected_column = columns_names.pop(x_column_choice_idx - 1)
+                            x_column_names.append(selected_column)
+                            print(x_column_names)
+                        elif x_column_choice_idx == 0:
+                            if len(x_column_names) == 0:
+                                print("You must select at lest one column as feature")
+                                x_column_choice_idx = None
+                    test_size = select_test_data_percentage()
+                    data_splited = split_to_test_training(df[x_column_names], df[y_label], test_size)
+                    print(data_splited)
                 elif data_preparation_choice == "0":
                     continue
                 else:

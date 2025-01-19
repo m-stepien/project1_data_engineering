@@ -19,15 +19,19 @@ def imputation_missing_data(df):
 
 
 def data_standardization(df):
+    df = df.copy()
+    numerical_cols = df.select_dtypes(include=['number']).columns
     scaler = StandardScaler()
-    df_standardized = scaler.fit_transform(df)
-    return pd.DataFrame(df_standardized, columns=df.columns)
+    df[numerical_cols] = scaler.fit_transform(df[numerical_cols])
+    return df
 
 
 def data_normalization(df):
+    df = df.copy()
+    numerical_cols = df.select_dtypes(include=['number']).columns
     scaler = MinMaxScaler()
-    df_normalized = scaler.fit_transform(df)
-    return pd.DataFrame(df_normalized, columns=df.columns)
+    df[numerical_cols] = scaler.fit_transform(df[numerical_cols])
+    return pd.DataFrame(df, columns=df.columns)
 
 
 def one_hot_encoding(df):

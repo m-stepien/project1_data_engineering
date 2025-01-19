@@ -1,7 +1,8 @@
 from dataload import load_from_file, get_atributes_list_for_file_extension
 from vizualization import show_histogram, show_scatter_plot, show_heatmap, show_missing_data, data_distribution
 from statistical_summary import calc_statistic_for_all_columns, calc_corr_for_all, split_df_to_categorical_and_numerical
-from data_preparation import removing_missing_data, imputation_missing_data, data_standardization, data_normalization
+from data_preparation import removing_missing_data, imputation_missing_data, data_standardization, data_normalization, \
+    one_hot_encoding, label_encoding
 import pandas as pd
 import numpy as np
 
@@ -57,10 +58,10 @@ def main():
             "6. Export results\n0.Exit")
         main_choice = input()
         if main_choice == "1":
-            print("1. Histogram\n2. Scatter plot\n3. Correlations between variables\n4. Missing data analysis\n"
-                  "5. Distribution of variables\n 0. Back")
             visualization_choice = None
             while visualization_choice != "0":
+                print("1. Histogram\n2. Scatter plot\n3. Correlations between variables\n4. Missing data analysis\n"
+                      "5. Distribution of variables\n 0. Back")
                 visualization_choice = input()
                 if visualization_choice == "1":
                     print("Select column")
@@ -110,17 +111,15 @@ def main():
                             data_distribution(df[column_name], column_name)
                         elif column_selection == "0":
                             continue
-
                     data_distribution(df["Income"])
                 elif visualization_choice == "0":
                     continue
                 else:
                     print("No such option")
         elif main_choice == "2":
-            print("1. Summary\n2. Corelation\n0. Back")
-
             statistic_summary_choice = None
             while statistic_summary_choice != "0":
+                print("1. Summary\n2. Corelation\n0. Back")
                 statistic_summary_choice = input()
                 if statistic_summary_choice == "1":
                     results = calc_statistic_for_all_columns(df)
@@ -132,15 +131,16 @@ def main():
                     correlation = calc_corr_for_all(df)
                     print(correlation.to_string())
         elif main_choice == "3":
-            print("1. Data cleaning\n2. Coding categorical variable\n3. Splitting to training and testing data")
             data_preparation_choice = None
             while data_preparation_choice != "0":
+                print("1. Data cleaning\n2. Coding categorical variable\n3. Splitting to training and testing data"
+                      "\n0. Back")
                 data_preparation_choice = input()
                 if data_preparation_choice == "1":
-                    print("1. Deleting missing data\n2. Imputation of missing data\n3. Data standardization\n"
-                          "4. Data normalization\n0. Back")
                     data_cleaning_choice = None
                     while data_cleaning_choice != "0":
+                        print("1. Deleting missing data\n2. Imputation of missing data\n3. Data standardization\n"
+                              "4. Data normalization\n0. Back")
                         data_cleaning_choice = input()
                         if data_cleaning_choice == "1":
                             removing_missing_data(df)
@@ -155,9 +155,26 @@ def main():
                         else:
                             print("No such option")
                 elif data_preparation_choice == "2":
-                    pass
+                    categorical_encoding_choice = None
+                    while categorical_encoding_choice != "0":
+                        print("1. One-Hot Encoding\n2. Label Encoding\n0. Back")
+                        categorical_encoding_choice = input()
+                        if categorical_encoding_choice == "1":
+                            df = one_hot_encoding(df)
+                            print(df.head().to_string())
+                        elif categorical_encoding_choice == "2":
+                            df = label_encoding(df)
+                            print(df.head().to_string())
+                        elif categorical_encoding_choice == "0":
+                            continue
+                        else:
+                            print("No such option")
                 elif data_preparation_choice == "3":
-                    pass
+                    x_column_names = []
+                    y_label = choose_column()
+                    x_column_choice_idx = None
+                    columns_names = df.select_dtypes(include=['number']).columns
+
                 elif data_preparation_choice == "0":
                     continue
                 else:

@@ -5,22 +5,23 @@ from sklearn.model_selection import train_test_split
 
 
 def removing_missing_data(df):
-    return df.dropna()
+    df.dropna(inplace=True)
 
 
 def imputation_missing_data(df):
+    df = df.copy()
     for col in df.columns:
-        if df[col].dtypes.kind in ['i', 'u', 'f', 'c']:
-            df[col].fillna(df[col].mean(), inplace=True)
+        if df[col].dtype.kind in ['i', 'u', 'f', 'c']:
+            df[col] = df[col].fillna(df[col].mean())
         else:
-            df[col].fillna(df[col].mode()[0], inplace=True)
+            df[col] = df[col].fillna(df[col].mode()[0])
     return df
 
 
 def data_standardization(df):
     scaler = StandardScaler()
     df_standardized = scaler.fit_transform(df)
-    pd.DataFrame(df_standardized, columns=df.columns)
+    return pd.DataFrame(df_standardized, columns=df.columns)
 
 
 def data_normalization(df):

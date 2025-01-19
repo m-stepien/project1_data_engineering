@@ -5,13 +5,23 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 
 
 def calc_statistic_for_all_columns(data):
-    for column in data.colums:
-        mean = column.mean()
-        std = column.std()
-        median = column.median()
-        q1 = column.quantile(0.25)
-        q3 = column.quantile(0.75)
-    pass
+    stats = {}
+    stats_categorical = {}
+    for column in data.select_dtypes(include=['number']).columns:
+        stats[column] = {
+            'mean': data[column].mean(),
+            'std': data[column].std(),
+            'median': data[column].median(),
+            'q1': data[column].quantile(0.25),
+            'q3': data[column].quantile(0.75)
+        }
+    for column in data.select_dtypes(include=['object', 'category']).columns:
+        stats_categorical[column] = {
+            'unique_values': data[column].nunique(),
+            'most_common': data[column].mode()[0] if not data[column].mode().empty else None,
+            'top_5_values': data[column].value_counts().head(5).to_dict()  # do zmiany
+        }
+    return pd.DataFrame(stats).T, pd.DataFrame(stats_categorical).T
 
 
 def calc_corr_between_two_columns(col1, col2):
@@ -19,7 +29,7 @@ def calc_corr_between_two_columns(col1, col2):
 
 
 def calc_corr_for_all(data):
-    return data.corr()
+    return split_df_to_categorical_and_numerical(data)[0].corr()
 
 
 def split_df_to_categorical_and_numerical(data):

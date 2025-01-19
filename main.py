@@ -1,6 +1,7 @@
 from dataload import load_from_file, get_atributes_list_for_file_extension
 from vizualization import show_histogram, show_scatter_plot, show_heatmap, show_missing_data, data_distribution
-from statistical_summary import calc_corr_for_all, split_df_to_categorical_and_numerical
+from statistical_summary import calc_statistic_for_all_columns, calc_corr_for_all, split_df_to_categorical_and_numerical
+from data_preparation import removing_missing_data, imputation_missing_data, data_standardization, data_normalization
 import pandas as pd
 import numpy as np
 
@@ -28,18 +29,6 @@ def additional_parameters(fname):
     return personal_parameters
 
 
-def exploration_menu():
-    print(
-        "1. Histogram\n2. Wykres punktowy \n3. Korelacja między zmiennymi\n4.Analiza braków danych\n5. Rozkład zmiennych\n"
-        "6. Podsumowanie statystyczne")
-    choice = input()
-    return choice
-
-
-def vizualization_menu():
-    print("1. Histogram\n2. Scatter plot\n3. Correlations between variables\n0. Back")
-
-
 def choose_column(columns_name):
     for idx, column in enumerate(columns_name):
         print(f"{idx + 1}. {column}")
@@ -54,7 +43,6 @@ def choose_column(columns_name):
                 choice = None
         except Exception as e:
             print("Choice must by a number")
-
 
 
 def main():
@@ -129,9 +117,51 @@ def main():
                 else:
                     print("No such option")
         elif main_choice == "2":
-            pass
+            print("1. Summary\n2. Corelation\n0. Back")
+
+            statistic_summary_choice = None
+            while statistic_summary_choice != "0":
+                statistic_summary_choice = input()
+                if statistic_summary_choice == "1":
+                    results = calc_statistic_for_all_columns(df)
+                    print("Summary for numerical values")
+                    print(results[0])
+                    print("Summary for categorical values")
+                    print(results[1])
+                elif statistic_summary_choice == "2":
+                    correlation = calc_corr_for_all(df)
+                    print(correlation.to_string())
         elif main_choice == "3":
-            pass
+            print("1. Data cleaning\n2. Coding categorical variable\n3. Splitting to training and testing data")
+            data_preparation_choice = None
+            while data_preparation_choice != "0":
+                data_preparation_choice = input()
+                if data_preparation_choice == "1":
+                    print("1. Deleting missing data\n2. Imputation of missing data\n3. Data standardization\n"
+                          "4. Data normalization\n0. Back")
+                    data_cleaning_choice = None
+                    while data_cleaning_choice != "0":
+                        data_cleaning_choice = input()
+                        if data_cleaning_choice == "1":
+                            removing_missing_data(df)
+                        elif data_cleaning_choice == "2":
+                            df = imputation_missing_data(df)
+                        elif data_cleaning_choice == "3":
+                            df = data_standardization(df)
+                        elif data_cleaning_choice == "4":
+                            df = data_normalization(df)
+                        elif data_cleaning_choice == "0":
+                            continue
+                        else:
+                            print("No such option")
+                elif data_preparation_choice == "2":
+                    pass
+                elif data_preparation_choice == "3":
+                    pass
+                elif data_preparation_choice == "0":
+                    continue
+                else:
+                    print("No such option")
         elif main_choice == "4":
             pass
         elif main_choice == "5":
@@ -143,38 +173,6 @@ def main():
         else:
             print("Sorry but there is no such option")
 
-    vizualization_menu()
-
-
-# show_histogram(numeric_values)
-# show_scatter_plot(df["Age"], df["Income"], x_name="Age", y_name="Income")
-# corr_matrix = selected_columns.corr()
-# show_heatmap(corr_matrix)
-
-# np.random.seed(42)
-# data = {
-#     'A': np.random.choice([1, 2, np.nan], size=100, p=[0.6, 0.3, 0.1]),
-#     'B': np.random.choice([5, np.nan], size=100, p=[0.8, 0.2]),
-#     'C': np.random.choice([np.nan, 10, 20], size=100, p=[0.15, 0.5, 0.35]),
-#     'D': np.random.choice([3, 4, np.nan], size=100, p=[0.7, 0.2, 0.1]),
-#     'E': np.random.choice([np.nan, 7], size=100, p=[0.05, 0.95]),
-# }
-#
-# df_with_nan = pd.DataFrame(data)
-# df_with_nan['E'] = np.nan
-# show_missing_data(df_with_nan)
-
-# np.random.seed(42)
-# data = {
-#     'Kategoria': np.random.choice(['A', 'B', 'C', 'D'], size=100),
-#     'Wartości': np.random.randint(1, 100, size=100)
-# }
-#
-# df_categorical = pd.DataFrame(data)
-# df_categorical['Kategoria'] = df_categorical['Kategoria'].replace('A', 'E')
-# # data_distribution(df_categorical["Kategoria"])
-# print(df_categorical["Wartości"])
-# data_distribution(df_categorical["Wartości"], "Wartości")
 
 if __name__ == '__main__':
     main()

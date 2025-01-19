@@ -3,6 +3,7 @@ from vizualization import show_histogram, show_scatter_plot, show_heatmap, show_
 from statistical_summary import calc_statistic_for_all_columns, calc_corr_for_all, split_df_to_categorical_and_numerical
 from data_preparation import removing_missing_data, imputation_missing_data, data_standardization, data_normalization, \
     one_hot_encoding, label_encoding, split_to_test_training
+from model import train_decision_tree_classifier, train_knn
 import pandas as pd
 import numpy as np
 
@@ -45,6 +46,7 @@ def choose_column(columns_name):
         except Exception as e:
             print("Choice must by a number")
 
+
 def select_test_data_percentage():
     while True:
         try:
@@ -57,7 +59,64 @@ def select_test_data_percentage():
             print("Input must be a number")
 
 
+def get_criterion():
+    while True:
+        print("Select criterion for decision tree\n1. Gini\n2. Entropy")
+        choice = input()
+        if choice == "1":
+            return "gini"
+        elif choice == "2":
+            return "entropy"
+        else:
+            print("You must select 1 or 2")
+
+
+def get_max_depth():
+    while True:
+        choice = input("\nEnter the max depth (positive integer or 0 for no limits): ")
+        if choice.lower() == "0":
+            return None
+        try:
+            max_depth = int(choice)
+            if max_depth > 0:
+                return max_depth
+            else:
+                print("Max depth can't be negative")
+        except ValueError:
+            print("You must give number as input")
+
+
+def get_n_neighbors():
+    while True:
+        try:
+            n_neighbors = int(input("\nEnter the number of neighbors for KNN: ").strip())
+            if n_neighbors > 0:
+                return n_neighbors
+            else:
+                print("Number of neighbors must be a positive integer")
+        except ValueError:
+            print("Input must be a number")
+
+
+def get_knn_metric():
+    metrics = ['euclidean', 'manhattan', 'minkowski', 'chebyshev', 'cosine', 'hamming']
+    print("Select metrics for KNN:")
+    for i, metric in enumerate(metrics):
+        print(f"{i+1}. {metric}")
+    while True:
+        choice = input("Choose a metric by entering the number: ").strip()
+        try:
+            choice_index = int(choice) - 1
+            if 0 <= choice_index < len(metrics):
+                return metrics[choice_index]
+            else:
+                print("Invalid choice. Please enter a valid number from the list")
+        except ValueError:
+            print("Invalid input")
+
+
 def main():
+    data_splitted = None
     filename = file_name_screen()
     atributes = additional_parameters(filename)
     df = load_from_file(filename, atributes)
@@ -65,7 +124,7 @@ def main():
     main_choice = None
     while main_choice != "0":
         print(
-            "1. Vizualization\n2. Statistic summary\n3. Data preparation\n4. Model selection\n5. Budowanie modelu\n6. Model evaluation\n"
+            "1. Vizualization\n2. Statistic summary\n3. Data preparation\n4. Model selection\n5. Building model\n6. Model evaluation\n"
             "6. Export results\n0.Exit")
         main_choice = input()
         if main_choice == "1":
@@ -190,7 +249,7 @@ def main():
                     print("Select features")
                     while x_column_choice_idx != 0:
                         for idx, column_name in enumerate(columns_names):
-                            print(f"{idx+1}. {column_name}")
+                            print(f"{idx + 1}. {column_name}")
                         print("0. Continue")
                         try:
                             x_column_choice_idx = int(input())
@@ -206,14 +265,51 @@ def main():
                                 print("You must select at lest one column as feature")
                                 x_column_choice_idx = None
                     test_size = select_test_data_percentage()
-                    data_splited = split_to_test_training(df[x_column_names], df[y_label], test_size)
-                    print(data_splited)
+                    data_splitted = split_to_test_training(df[x_column_names], df[y_label], test_size)
+                    print(data_splitted)
                 elif data_preparation_choice == "0":
                     continue
                 else:
                     print("No such option")
         elif main_choice == "4":
-            pass
+            if data_splitted is None:
+                print("First you must split data to training and testing")
+            else:
+                model_category_choice = None
+                while model_category_choice != "0":
+                    print("1. Classification models\n2. Regression model\n0. Back")
+                    model_category_choice = input()
+                    if model_category_choice == "1":
+                        categorical_model_choice = None
+                        while categorical_model_choice != "0":
+                            print(
+                                "1. Decision trees\n2. KNN algorithm\n3. Random Forest\n4. SVM\n5. Logistic regression"
+                                "\n0. Back")
+                            categorical_model_choice = input()
+                            if categorical_model_choice == "1":
+                                criterion = get_criterion()
+                                max_depth = get_max_depth()
+                                try:
+                                    model = train_decision_tree_classifier(data_splitted[0], data_splitted[2], criterion, max_depth)
+                                    print(model)
+                                except ValueError:
+                                    print("You select continuous type as label you must use one of regresion model instead")
+                                    categorical_model_choice = "0"
+                            elif categorical_model_choice == "2":
+                                neighbors = get_n_neighbors()
+                                metric = get_knn_metric()
+                                model = train_knn(data_splitted[0], data_splitted[2], neighbors, metric)
+                                print(model)
+                            elif categorical_model_choice == "3":
+                                pass
+                            elif categorical_model_choice == "4":
+                                pass
+                            elif categorical_model_choice == "5":
+                                pass
+                            elif categorical_model_choice == "0":
+                                continue
+                    elif model_category_choice == "2":
+                        print("1. Linear regression\n2. Regression trees\n3. Random Forest")
         elif main_choice == "5":
             pass
         elif main_choice == "6":

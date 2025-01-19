@@ -6,7 +6,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.linear_model import LinearRegression
 
 
-def train_decision_tree_classifier(x_train, y_train, criterion, max_depth):
+def train_decision_tree_classifier(x_train, y_train, criterion="gini", max_depth=None):
     model = DecisionTreeClassifier(criterion=criterion, max_depth=max_depth)
     model.fit(x_train, y_train)
     return model

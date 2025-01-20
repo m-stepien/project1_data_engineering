@@ -4,6 +4,7 @@ from statistical_summary import *
 from data_preparation import removing_missing_data, imputation_missing_data, data_standardization, data_normalization, \
     one_hot_encoding, label_encoding, split_to_test_training
 from model import *
+from model_optimalization import *
 import pandas as pd
 import numpy as np
 
@@ -278,11 +279,13 @@ def main():
                     y_pred_prob = model.predict_proba(data_splitted[1])
                     classification_evaluation = classification_model_evaluation(data_splitted[3], y_pred, y_pred_prob)
                     print(classification_evaluation)
-                    show_vizualization_classification(data_splitted[3], y_pred)
+                    # show_vizualization_classification(data_splitted[3], y_pred)
+                    random_search(model, data_splitted[0], data_splitted[2])
                 else:
                     regression_evaluation = regresion_model_evaluation(data_splitted[3], y_pred)
                     print(regression_evaluation)
-                    show_regresion_real_predicted(data_splitted[3], y_pred)
+                    # show_regresion_real_predicted(data_splitted[3], y_pred)
+                    random_search(model, data_splitted[0], data_splitted[2])
             else:
                 print("You must select model before")
         elif main_choice == "6":

@@ -3,9 +3,21 @@ from vizualization import show_histogram, show_scatter_plot, show_heatmap, show_
 from statistical_summary import calc_statistic_for_all_columns, calc_corr_for_all, split_df_to_categorical_and_numerical
 from data_preparation import removing_missing_data, imputation_missing_data, data_standardization, data_normalization, \
     one_hot_encoding, label_encoding, split_to_test_training
-from model import train_decision_tree_classifier, train_knn
+from model import *
 import pandas as pd
 import numpy as np
+
+
+MODELS = {
+    "decision tree": train_decision_tree_classifier,
+    "knn": train_knn,
+    "random forest": train_random_forest,
+    "svm": train_svc,
+    "logistic regression": train_logistic_regression,
+    "linear regression": train_linear_regression,
+    "regression tree": train_decision_tree_regressor,
+    "random forest (regression)": train_random_forest_regressor
+}
 
 
 def file_name_screen():
@@ -59,64 +71,18 @@ def select_test_data_percentage():
             print("Input must be a number")
 
 
-def get_criterion():
-    while True:
-        print("Select criterion for decision tree\n1. Gini\n2. Entropy")
-        choice = input()
-        if choice == "1":
-            return "gini"
-        elif choice == "2":
-            return "entropy"
-        else:
-            print("You must select 1 or 2")
-
-
-def get_max_depth():
-    while True:
-        choice = input("\nEnter the max depth (positive integer or 0 for no limits): ")
-        if choice.lower() == "0":
-            return None
-        try:
-            max_depth = int(choice)
-            if max_depth > 0:
-                return max_depth
-            else:
-                print("Max depth can't be negative")
-        except ValueError:
-            print("You must give number as input")
-
-
-def get_n_neighbors():
-    while True:
-        try:
-            n_neighbors = int(input("\nEnter the number of neighbors for KNN: ").strip())
-            if n_neighbors > 0:
-                return n_neighbors
-            else:
-                print("Number of neighbors must be a positive integer")
-        except ValueError:
-            print("Input must be a number")
-
-
-def get_knn_metric():
-    metrics = ['euclidean', 'manhattan', 'minkowski', 'chebyshev', 'cosine', 'hamming']
-    print("Select metrics for KNN:")
-    for i, metric in enumerate(metrics):
-        print(f"{i+1}. {metric}")
-    while True:
-        choice = input("Choose a metric by entering the number: ").strip()
-        try:
-            choice_index = int(choice) - 1
-            if 0 <= choice_index < len(metrics):
-                return metrics[choice_index]
-            else:
-                print("Invalid choice. Please enter a valid number from the list")
-        except ValueError:
-            print("Invalid input")
+def is_label_categorical(label):
+    if label.dtype == "object" or label.dtype.name == "category":
+        return True
+    if np.issubdtype(label.dtype, np.floating):
+        return False
+    else:
+        return True
 
 
 def main():
     data_splitted = None
+    selected_model = None
     filename = file_name_screen()
     atributes = additional_parameters(filename)
     df = load_from_file(filename, atributes)
@@ -275,43 +241,41 @@ def main():
             if data_splitted is None:
                 print("First you must split data to training and testing")
             else:
-                model_category_choice = None
-                while model_category_choice != "0":
-                    print("1. Classification models\n2. Regression model\n0. Back")
-                    model_category_choice = input()
-                    if model_category_choice == "1":
-                        categorical_model_choice = None
-                        while categorical_model_choice != "0":
-                            print(
-                                "1. Decision trees\n2. KNN algorithm\n3. Random Forest\n4. SVM\n5. Logistic regression"
-                                "\n0. Back")
-                            categorical_model_choice = input()
-                            if categorical_model_choice == "1":
-                                criterion = get_criterion()
-                                max_depth = get_max_depth()
-                                try:
-                                    model = train_decision_tree_classifier(data_splitted[0], data_splitted[2], criterion, max_depth)
-                                    print(model)
-                                except ValueError:
-                                    print("You select continuous type as label you must use one of regresion model instead")
-                                    categorical_model_choice = "0"
-                            elif categorical_model_choice == "2":
-                                neighbors = get_n_neighbors()
-                                metric = get_knn_metric()
-                                model = train_knn(data_splitted[0], data_splitted[2], neighbors, metric)
-                                print(model)
-                            elif categorical_model_choice == "3":
-                                pass
-                            elif categorical_model_choice == "4":
-                                pass
-                            elif categorical_model_choice == "5":
-                                pass
-                            elif categorical_model_choice == "0":
-                                continue
-                    elif model_category_choice == "2":
-                        print("1. Linear regression\n2. Regression trees\n3. Random Forest")
+                if is_label_categorical(data_splitted[2]):
+                    categorical_model_choice = None
+                    while categorical_model_choice != "0":
+                        print(
+                            "1. Decision tree\n2. KNN algorithm\n3. Random Forest\n4. SVM\n5. Logistic regression"
+                            "\n0. Back")
+                        categorical_model_choice = input()
+                        if categorical_model_choice == "1":
+                            selected_model = "decision tree"
+                        elif categorical_model_choice == "2":
+                            selected_model = "knn"
+                        elif categorical_model_choice == "3":
+                            selected_model = "random forest"
+                        elif categorical_model_choice == "4":
+                            selected_model = "svm"
+                        elif categorical_model_choice == "5":
+                            selected_model = "logistic regression"
+                        print(f"Selected model {selected_model}")
+                else:
+                    regression_model_choice = None
+                    while regression_model_choice != "0":
+                        print("1. Linear regression\n2. Regression tree\n3. Random Forest\n0. Back")
+                        regression_model_choice = input()
+                        if regression_model_choice == "1":
+                            selected_model = "linear regression"
+                        elif regression_model_choice == "2":
+                            selected_model = "regression tree"
+                        elif regression_model_choice == "3":
+                            selected_model = "random forest (regression)"
+                        print(f"Selected model {selected_model}")
         elif main_choice == "5":
-            pass
+            if selected_model is not None:
+                print("ok")
+            else:
+                print("You must select model before")
         elif main_choice == "6":
             pass
         elif main_choice == "0":

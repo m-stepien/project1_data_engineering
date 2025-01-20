@@ -1,4 +1,5 @@
 from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
+import pandas as pd
 
 param_grid = {
     'DecisionTreeClassifier': {
@@ -44,13 +45,15 @@ param_grid = {
 
 def grid_search(model, x_train, y_train, scoring='r2'):
     model_name = type(model).__name__
-    cv = GridSearchCV(estimator=model, param_grid=param_grid[model_name], cv=5, scoring=scoring, n_jobs=-1)
+    cv = GridSearchCV(estimator=model, param_grid=param_grid[model_name], cv=5, scoring=scoring, n_jobs=-1, return_train_score=True)
     cv.fit(x_train, y_train)
+    results = pd.DataFrame(cv.cv_results_)
+    results = results[['params', 'mean_test_score', 'std_test_score', 'rank_test_score']]
+    print(results)
+    print(f"Best {model_name}: {cv.best_params_}")
+    print(f"Best score: {cv.best_score_}")
 
-    print(f"Najlepsze parametry dla {model_name}: {cv.best_params_}")
-    print(f"Najlepszy wynik: {cv.best_score_}")
-
-    return cv.best_estimator_
+    return cv.best_estimator_, results
 
 
 def random_search(model, x_train, y_train, scoring='r2', n_iter=10):
@@ -63,11 +66,14 @@ def random_search(model, x_train, y_train, scoring='r2', n_iter=10):
         scoring=scoring,
         verbose=2,
         random_state=42,
-        n_jobs=-1
+        n_jobs=-1,
+        return_train_score=True
     )
     rs.fit(x_train, y_train)
+    results = pd.DataFrame(rs.cv_results_)
+    results = results[['params', 'mean_test_score', 'std_test_score', 'rank_test_score']]
+    print(results)
+    print(f"Best {model_name}: {rs.best_params_}")
+    print(f"Best score: {rs.best_score_}")
 
-    print(f"Najlepsze parametry dla {model_name}: {rs.best_params_}")
-    print(f"Najlepszy wynik: {rs.best_score_}")
-
-    return rs.best_estimator_
+    return rs.best_estimator_, results

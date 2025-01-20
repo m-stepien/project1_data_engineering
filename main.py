@@ -274,18 +274,19 @@ def main():
         elif main_choice == "5":
             if selected_model is not None:
                 model = MODELS[selected_model](data_splitted[0], data_splitted[2])
-                y_pred = model.predict(data_splitted[1])
                 if is_label_categorical(data_splitted[2]):
+                    model, score_results = random_search(model, data_splitted[0], data_splitted[2])
+                    y_pred = model.predict(data_splitted[1])
                     y_pred_prob = model.predict_proba(data_splitted[1])
                     classification_evaluation = classification_model_evaluation(data_splitted[3], y_pred, y_pred_prob)
                     print(classification_evaluation)
-                    # show_vizualization_classification(data_splitted[3], y_pred)
-                    random_search(model, data_splitted[0], data_splitted[2])
+                    show_vizualization_classification(data_splitted[3], y_pred)
                 else:
+                    model, score_results = random_search(model, data_splitted[0], data_splitted[2])
+                    y_pred = model.predict(data_splitted[1])
                     regression_evaluation = regresion_model_evaluation(data_splitted[3], y_pred)
                     print(regression_evaluation)
-                    # show_regresion_real_predicted(data_splitted[3], y_pred)
-                    random_search(model, data_splitted[0], data_splitted[2])
+                    show_regresion_real_predicted(data_splitted[3], y_pred)
             else:
                 print("You must select model before")
         elif main_choice == "6":

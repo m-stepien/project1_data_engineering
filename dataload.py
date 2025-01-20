@@ -1,12 +1,13 @@
 import pandas as pd
 import numpy as np
 
-EXCEL_EXTENSIONS = ["xls", "xlsx", "xlsm", "xlsb", "odf", "ods", "odt"] #atributes sheet_name header
-CSV_EXTENSIONS = ["csv", "tsv"] #atributes sep decimal
-JSON_EXTENSIONS = ["json"] #atributes empty
-CSV_ATRIBUTES_LIST = ["sep", "decimal", "index_col", "skiprows", "header"]
+EXCEL_EXTENSIONS = ["xls", "xlsx", "xlsm", "xlsb", "odf", "ods", "odt"]
+CSV_EXTENSIONS = ["csv", "tsv"]
+JSON_EXTENSIONS = ["json"]
 DEFAULT_ATRIBUTES = {"csv": {"sep": ",", "decimal": ".", "index_col": None, "skiprows": None,
-                             "header": "infer", "usecols": None}}
+                             "header": "infer", "usecols": None},
+                     "json": {"orient": None, "typ": None},
+                     "excel": {"sheet_name": 0, "header": 0}}
 
 
 def load_from_file(filename: str, atributes: dict):
@@ -44,6 +45,6 @@ def add_default_param(extension_category, atributes):
         atributes[param] = DEFAULT_ATRIBUTES.get("csv").get(param)
     return atributes
 
+
 def get_atributes_list_for_file_extension(extension):
     return DEFAULT_ATRIBUTES.get(extension).keys()
-

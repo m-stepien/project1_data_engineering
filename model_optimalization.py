@@ -56,7 +56,7 @@ def grid_search(model, x_train, y_train, scoring='r2'):
     return cv.best_estimator_, results
 
 
-def random_search(model, x_train, y_train, scoring='r2', n_iter=10):
+def random_search(model, x_train, y_train, scoring='r2', n_iter=5):
     model_name = type(model).__name__
     rs = RandomizedSearchCV(
         estimator=model,

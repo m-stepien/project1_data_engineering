@@ -5,7 +5,7 @@ from data_preparation import removing_missing_data, imputation_missing_data, dat
     one_hot_encoding, label_encoding, split_to_test_training
 from model import *
 from model_optimalization import *
-import pandas as pd
+from saving import *
 import numpy as np
 
 MODELS = {
@@ -18,6 +18,9 @@ MODELS = {
     "regression tree": train_decision_tree_regressor,
     "random forest (regression)": train_random_forest_regressor
 }
+
+results_to_save = {}
+fig_to_save = []
 
 
 def file_name_screen():
@@ -55,7 +58,7 @@ def choose_column(columns_name):
             else:
                 print("You must choose from index of columns")
                 choice = None
-        except Exception as e:
+        except Exception:
             print("Choice must by a number")
 
 
@@ -71,6 +74,15 @@ def select_test_data_percentage():
             print("Input must be a number")
 
 
+def select_search_method():
+    print("1. Grid Search\n2. Random Search")
+    while True:
+        choice = input()
+        if choice in ["1", "2"]:
+            return int(choice)
+        print("Select 1 or 2")
+
+
 def is_label_categorical(label):
     if label.dtype == "object" or label.dtype.name == "category":
         return True
@@ -83,6 +95,7 @@ def is_label_categorical(label):
 def main():
     data_splitted = None
     selected_model = None
+    model = None
     filename = file_name_screen()
     atributes = additional_parameters(filename)
     df = load_from_file(filename, atributes)
@@ -90,53 +103,59 @@ def main():
     main_choice = None
     while main_choice != "0":
         print(
-            "1. Vizualization\n2. Statistic summary\n3. Data preparation\n4. Model selection\n5. Building model\n6. Model evaluation\n"
+            "1. Vizualization\n2. Statistic summary\n3. Data preparation\n4. Model selection\n5. Building model\n"
             "6. Export results\n0.Exit")
         main_choice = input()
         if main_choice == "1":
             visualization_choice = None
             while visualization_choice != "0":
                 print("1. Histogram\n2. Scatter plot\n3. Correlations between variables\n4. Missing data analysis\n"
-                      "5. Distribution of variables\n 0. Back")
+                      "5. Distribution of variables\n0. Back")
                 visualization_choice = input()
                 if visualization_choice == "1":
                     print("Select column")
                     for index, column in enumerate(df.columns):
                         print(f"{index + 1}. {column}")
-                    print(f"{len(df.columns) + 1}. SELECT ALL")
+                    print("-1. Show all")
                     print("0. Back")
                     column_selection = None
-                    while column_selection != "0":
+                    while column_selection != 0:
                         try:
                             column_selection = int(input())
-                        except Exception as e:
+                        except Exception:
                             print("choice must be a number")
                             continue
                         if column_selection == len(df.columns) + 1:
                             pass
                         elif 0 < column_selection <= len(df.columns):
                             column_name = df.columns[column_selection - 1]
-                            show_histogram(df[column_name], column_name)
-                        elif column_selection == "0":
+                            fig = show_histogram(df[column_name], column_name)
+                            fig_to_save.append(fig)
+                        elif column_selection == -1:
+                            show_all_histograms(df)
+                        elif column_selection == 0:
                             continue
                 elif visualization_choice == "2":
                     numerical_columns = df.select_dtypes(exclude=['object', 'category', 'string']).columns.tolist()
                     column_name_1 = choose_column(numerical_columns)
                     numerical_columns.remove(column_name_1)
                     column_name_2 = choose_column(numerical_columns)
-                    show_scatter_plot(df[column_name_1], df[column_name_2], column_name_1, column_name_2)
+                    fig = show_scatter_plot(df[column_name_1], df[column_name_2], column_name_1, column_name_2)
+                    fig_to_save.append(fig)
                 elif visualization_choice == "3":
                     corr = calc_corr_for_all(df.select_dtypes(exclude=['object', 'category', 'string']))
-                    show_heatmap(corr)
+                    fig = show_heatmap(corr)
+                    fig_to_save.append(fig)
                 elif visualization_choice == "4":
-                    show_missing_data(df)
+                    fig = show_missing_data(df)
+                    fig_to_save.append(fig)
                 elif visualization_choice == "5":
                     print("Select column")
                     for index, column in enumerate(df.columns):
                         print(f"{index + 1}. {column}")
                     print("0. Back")
                     column_selection = None
-                    while column_selection != "0":
+                    while column_selection != 0:
                         try:
                             column_selection = int(input())
                         except Exception as e:
@@ -144,10 +163,8 @@ def main():
                             continue
                         if 0 < column_selection <= len(df.columns):
                             column_name = df.columns[column_selection - 1]
-                            data_distribution(df[column_name], column_name)
-                        elif column_selection == "0":
-                            continue
-                    data_distribution(df["Income"])
+                            fig = data_distribution(df[column_name], column_name)
+                            fig_to_save.append(fig)
                 elif visualization_choice == "0":
                     continue
                 else:
@@ -160,12 +177,16 @@ def main():
                 if statistic_summary_choice == "1":
                     results = calc_statistic_for_all_columns(df)
                     print("Summary for numerical values")
-                    print(results[0])
+                    print(results[0].to_string())
+                    results_to_save["numerical_summary"] = results[0].to_dict()
                     print("Summary for categorical values")
-                    print(results[1])
+                    print(results[1].to_string())
+                    results_to_save["categorical_summary"] = results[1].to_dict()
                 elif statistic_summary_choice == "2":
                     correlation = calc_corr_for_all(df)
                     print(correlation.to_string())
+                    results_to_save["correlation"] = correlation.to_dict()
+
         elif main_choice == "3":
             data_preparation_choice = None
             while data_preparation_choice != "0":
@@ -274,23 +295,54 @@ def main():
         elif main_choice == "5":
             if selected_model is not None:
                 model = MODELS[selected_model](data_splitted[0], data_splitted[2])
+                search_method_choice = select_search_method()
                 if is_label_categorical(data_splitted[2]):
-                    model, score_results = random_search(model, data_splitted[0], data_splitted[2])
+                    if search_method_choice == 1:
+                        model, score_results = grid_search(model, data_splitted[0], data_splitted[2])
+                    else:
+                        model, score_results = random_search(model, data_splitted[0], data_splitted[2])
                     y_pred = model.predict(data_splitted[1])
                     y_pred_prob = model.predict_proba(data_splitted[1])
                     classification_evaluation = classification_model_evaluation(data_splitted[3], y_pred, y_pred_prob)
                     print(classification_evaluation)
-                    show_vizualization_classification(data_splitted[3], y_pred)
+                    results_to_save["model_evaluation"] = classification_evaluation.to_dict(orient="records")
+                    results_to_save["score_results"] = score_results.to_dict(orient="records")
+                    fig = show_vizualization_classification(data_splitted[3], y_pred)
+                    fig_to_save.append(fig)
                 else:
-                    model, score_results = random_search(model, data_splitted[0], data_splitted[2])
+                    if search_method_choice == 1:
+                        model, score_results = grid_search(model, data_splitted[0], data_splitted[2])
+                    else:
+                        model, score_results = random_search(model, data_splitted[0], data_splitted[2])
                     y_pred = model.predict(data_splitted[1])
                     regression_evaluation = regresion_model_evaluation(data_splitted[3], y_pred)
                     print(regression_evaluation)
-                    show_regresion_real_predicted(data_splitted[3], y_pred)
+                    results_to_save["model_evaluation"] = regression_evaluation.to_dict(orient="records")
+                    results_to_save["score_results"] = score_results.to_dict(orient="records")
+                    fig = show_regresion_real_predicted(data_splitted[3], y_pred)
+                    fig_to_save.append(fig)
             else:
                 print("You must select model before")
         elif main_choice == "6":
-            pass
+            save_choice = None
+            while save_choice != "0":
+                print("1. Save process data\n2. Sava results\n3. Save model\n4. Save raport\n0. Back")
+                save_choice = input()
+                if save_choice == "1":
+                    name = input("\nfilename: ")
+                    save_process_data_to_csv(df, name)
+                elif save_choice == "2":
+                    name = input("\nfilename: ")
+                    save_result_to_json(results_to_save, name)
+                elif save_choice == "3":
+                    if model is not None:
+                        name = input("\nfilename: ")
+                        save_model(model, name)
+                    else:
+                        print("First you need to train model")
+                elif save_choice == "4":
+                    name = input("\nfilename: ")
+                    save_to_pdf(fig_to_save, results_to_save, name)
         elif main_choice == "0":
             continue
         else:

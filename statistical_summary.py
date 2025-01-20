@@ -19,7 +19,6 @@ def calc_statistic_for_all_columns(data):
         stats_categorical[column] = {
             'unique_values': data[column].nunique(),
             'most_common': data[column].mode()[0] if not data[column].mode().empty else None,
-            'top_5_values': data[column].value_counts().head(5).to_dict()  # do zmiany
         }
     return pd.DataFrame(stats).T, pd.DataFrame(stats_categorical).T
 

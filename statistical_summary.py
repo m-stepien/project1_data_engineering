@@ -39,15 +39,21 @@ def split_df_to_categorical_and_numerical(data):
 
 
 def classification_model_evaluation(y, y_pred, y_pred_prob):
-    accuracy = accuracy_score(y, y_pred)
-    precision = precision_score(y, y_pred)
-    recall = recall_score(y, y_pred)
-    f1 = f1_score(y, y_pred)
-    auc = roc_auc_score(y, y_pred_prob)
+    metrics = {
+        "Accuracy": accuracy_score(y, y_pred),
+        "Precision": precision_score(y, y_pred, average="weighted"),
+        "Recall": recall_score(y, y_pred, average="weighted"),
+        "F1 Score": f1_score(y, y_pred, average="weighted"),
+        "AUC": roc_auc_score(y, y_pred_prob, multi_class="ovr")
+    }
+    return pd.DataFrame(metrics, index=["Score"])
 
 
 def regresion_model_evaluation(y, y_pred):
-    mse = mean_squared_error(y, y_pred)
-    rmse = np.sqrt(mse)
-    mae = mean_absolute_error(y, y_pred)
-    r2 = r2_score(y, y_pred)
+    metrics = {
+        "MSE": mean_squared_error(y, y_pred),
+        "RMSE": np.sqrt(mean_squared_error(y, y_pred)),
+        "MAE": mean_absolute_error(y, y_pred),
+        "R2": r2_score(y, y_pred)
+    }
+    return pd.DataFrame(metrics, index=["Score"]).T

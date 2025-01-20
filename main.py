@@ -1,12 +1,11 @@
 from dataload import load_from_file, get_atributes_list_for_file_extension
-from vizualization import show_histogram, show_scatter_plot, show_heatmap, show_missing_data, data_distribution
-from statistical_summary import calc_statistic_for_all_columns, calc_corr_for_all, split_df_to_categorical_and_numerical
+from vizualization import *
+from statistical_summary import *
 from data_preparation import removing_missing_data, imputation_missing_data, data_standardization, data_normalization, \
     one_hot_encoding, label_encoding, split_to_test_training
 from model import *
 import pandas as pd
 import numpy as np
-
 
 MODELS = {
     "decision tree": train_decision_tree_classifier,
@@ -273,7 +272,17 @@ def main():
                         print(f"Selected model {selected_model}")
         elif main_choice == "5":
             if selected_model is not None:
-                print("ok")
+                model = MODELS[selected_model](data_splitted[0], data_splitted[2])
+                y_pred = model.predict(data_splitted[1])
+                if is_label_categorical(data_splitted[2]):
+                    y_pred_prob = model.predict_proba(data_splitted[1])
+                    classification_evaluation = classification_model_evaluation(data_splitted[3], y_pred, y_pred_prob)
+                    print(classification_evaluation)
+                    show_vizualization_classification(data_splitted[3], y_pred)
+                else:
+                    regression_evaluation = regresion_model_evaluation(data_splitted[3], y_pred)
+                    print(regression_evaluation)
+                    show_regresion_real_predicted(data_splitted[3], y_pred)
             else:
                 print("You must select model before")
         elif main_choice == "6":

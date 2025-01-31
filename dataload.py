@@ -4,10 +4,9 @@ import numpy as np
 EXCEL_EXTENSIONS = ["xls", "xlsx", "xlsm", "xlsb", "odf", "ods", "odt"]
 CSV_EXTENSIONS = ["csv", "tsv"]
 JSON_EXTENSIONS = ["json"]
-DEFAULT_ATRIBUTES = {"csv": {"sep": ",", "decimal": ".", "index_col": None, "skiprows": None,
-                             "header": "infer", "usecols": None},
+DEFAULT_ATRIBUTES = {"csv": {"sep": ",", "decimal": "."},
                      "json": {"orient": None, "typ": None},
-                     "excel": {"sheet_name": 0, "header": 0}}
+                     "excel": {"sheet_name": 0}}
 
 
 def load_from_file(filename: str, atributes: dict):
@@ -16,13 +15,11 @@ def load_from_file(filename: str, atributes: dict):
     filled_atributes = add_default_param_for_file_extension(extension, atributes)
     print(filled_atributes)
     if extension in JSON_EXTENSIONS:
-        dataframe = pd.read_json(filename)
+        dataframe = pd.read_json(filename, orient=filled_atributes.get("orient"), typ=filled_atributes.get("typ"))
     elif extension in CSV_EXTENSIONS:
-        dataframe = pd.read_csv(filename, sep=filled_atributes.get("sep"), decimal=filled_atributes.get("decimal"),
-                                index_col=filled_atributes.get("index_col"), skiprows=filled_atributes.get("skiprows"),
-                                header=filled_atributes.get("header"), usecols=filled_atributes.get("usecols"))
+        dataframe = pd.read_csv(filename, sep=filled_atributes.get("sep"), decimal=filled_atributes.get("decimal"))
     elif extension in EXCEL_EXTENSIONS:
-        dataframe = pd.read_excel(filename)
+        dataframe = pd.read_excel(filename, sheet_name=filled_atributes.get("sheet_name"))
     return dataframe
 
 

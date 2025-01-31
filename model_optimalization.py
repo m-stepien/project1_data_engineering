@@ -43,7 +43,7 @@ param_grid = {
 }
 
 
-def grid_search(model, x_train, y_train, scoring='r2'):
+def grid_search(model, x_train, y_train, scoring='accuracy'):
     model_name = type(model).__name__
     cv = GridSearchCV(estimator=model, param_grid=param_grid[model_name], cv=5, scoring=scoring, n_jobs=-1, return_train_score=True)
     cv.fit(x_train, y_train)
@@ -56,13 +56,13 @@ def grid_search(model, x_train, y_train, scoring='r2'):
     return cv.best_estimator_, results
 
 
-def random_search(model, x_train, y_train, scoring='r2', n_iter=5):
+def random_search(model, x_train, y_train, scoring='accuracy', n_iter=3):
     model_name = type(model).__name__
     rs = RandomizedSearchCV(
         estimator=model,
         param_distributions=param_grid[model_name],
         n_iter=n_iter,
-        cv=5,
+        cv=2,
         scoring=scoring,
         verbose=2,
         random_state=42,

@@ -6,8 +6,11 @@ import numpy as np
 
 def show_histogram(data, column_name):
     fig, ax = plt.subplots(figsize=(8, 5))
-    ax.hist(data, bins=100, density=True, alpha=0.5, histtype='stepfilled')
+    ax.hist(data, bins='auto', density=False, alpha=0.5, histtype='stepfilled')
     ax.set_title(f"Histogram dla {column_name}")
+    ax.set_xlabel(column_name)
+    ax.set_ylabel("Liczba wystąpień")
+    plt.tight_layout()
     plt.show()
     return fig
 
@@ -16,29 +19,24 @@ def show_all_histograms(data):
     num_columns = len(data.columns)
     cols = min(5, num_columns)
     rows = (num_columns // cols) + (num_columns % cols > 0)
-
     fig, axes = plt.subplots(rows, cols, figsize=(cols * 3, rows * 3), constrained_layout=True)
-
     if num_columns == 1:
         axes = [axes]
-
     axes = axes.flatten() if num_columns > 1 else axes
-
     for i, column in enumerate(data.columns):
-        axes[i].hist(data[column].dropna(), bins=100, density=True, alpha=0.5, histtype='stepfilled')
-        axes[i].set_title(f"Histogram dla {column}")
+        axes[i].hist(data[column].dropna(), bins="auto", density=False, alpha=0.5, histtype='stepfilled')
+        axes[i].set_title(column)
         axes[i].set_xlabel(column)
-        axes[i].set_ylabel("Density")
+        axes[i].set_ylabel("Liczba wystąpień")
     for j in range(i + 1, len(axes)):
         fig.delaxes(axes[j])
-
     plt.show()
     return fig
 
 
 def show_scatter_plot(x, y, x_name, y_name):
     fig, ax = plt.subplots(figsize=(8, 6))
-    ax.scatter(x, y, alpha=0.7)
+    ax.scatter(x, y, alpha=0.3)
     ax.set_title(f"{x_name} {y_name}", fontsize=14)
     ax.set_xlabel(x_name, fontsize=12)
     ax.set_ylabel(y_name, fontsize=12)
@@ -46,8 +44,9 @@ def show_scatter_plot(x, y, x_name, y_name):
     plt.show()
     return fig
 
+
 def show_heatmap(corr_matrix):
-    fig, ax = plt.subplots(constrained_layout=True)  # Tworzymy figurę i przypisujemy oś
+    fig, ax = plt.subplots(constrained_layout=True)
     annot = True
     shape = corr_matrix.shape[0]
 
@@ -73,13 +72,13 @@ def show_heatmap(corr_matrix):
 
 def show_missing_data(data):
     fig, ax = plt.subplots(constrained_layout=True)
-    missing_percent = (data.isnull().sum() / len(data)) * 100
+    missing_percentage = (data.isnull().sum() / len(data)) * 100
     ax.set_ylim(0, 100)
     ax.set_yticks(np.arange(0, 101, 10))
     ax.set_title('Procent brakujących wartości dla każdej kolumny', fontsize=14)
     ax.set_xlabel('Kolumny', fontsize=12)
     ax.set_ylabel('Procent braków danych', fontsize=12)
-    missing_percent.plot(kind='bar', color='red', ax=ax)
+    missing_percentage.plot(kind='bar', color='red', ax=ax)
     plt.show()
     return fig
 
@@ -134,5 +133,3 @@ def show_vizualization_classification(y, y_pred):
     ax.set_title('Macierz Pomyłek')
     plt.show()
     return fig
-
-

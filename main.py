@@ -99,7 +99,7 @@ def main():
     filename = file_name_screen()
     atributes = additional_parameters(filename)
     df = load_from_file(filename, atributes)
-    print(df.head())
+    print(df.head().to_string())
     main_choice = None
     while main_choice != "0":
         print(
@@ -114,7 +114,9 @@ def main():
                 visualization_choice = input()
                 if visualization_choice == "1":
                     print("Select column")
-                    for index, column in enumerate(df.columns):
+                    numerical_columns = df.select_dtypes(exclude=['object', 'category', 'string', 'int']).columns.tolist()
+                    print(numerical_columns)
+                    for index, column in enumerate(numerical_columns):
                         print(f"{index + 1}. {column}")
                     print("-1. Show all")
                     print("0. Back")
@@ -125,14 +127,13 @@ def main():
                         except Exception:
                             print("choice must be a number")
                             continue
-                        if column_selection == len(df.columns) + 1:
-                            pass
-                        elif 0 < column_selection <= len(df.columns):
-                            column_name = df.columns[column_selection - 1]
+                        if 0 < column_selection <= len(numerical_columns):
+                            column_name = numerical_columns[column_selection - 1]
                             fig = show_histogram(df[column_name], column_name)
                             fig_to_save.append(fig)
                         elif column_selection == -1:
-                            show_all_histograms(df)
+                            fig = show_all_histograms(df.select_dtypes(exclude=['object', 'category', 'string','int']))
+                            fig_to_save.append(fig)
                         elif column_selection == 0:
                             continue
                 elif visualization_choice == "2":
@@ -253,7 +254,6 @@ def main():
                                 x_column_choice_idx = None
                     test_size = select_test_data_percentage()
                     data_splitted = split_to_test_training(df[x_column_names], df[y_label], test_size)
-                    print(data_splitted)
                 elif data_preparation_choice == "0":
                     continue
                 else:
@@ -298,9 +298,9 @@ def main():
                 search_method_choice = select_search_method()
                 if is_label_categorical(data_splitted[2]):
                     if search_method_choice == 1:
-                        model, score_results = grid_search(model, data_splitted[0], data_splitted[2])
+                        model, score_results = grid_search(model, data_splitted[0], data_splitted[2], "accuracy")
                     else:
-                        model, score_results = random_search(model, data_splitted[0], data_splitted[2])
+                        model, score_results = random_search(model, data_splitted[0], data_splitted[2], "accuracy")
                     y_pred = model.predict(data_splitted[1])
                     y_pred_prob = model.predict_proba(data_splitted[1])
                     classification_evaluation = classification_model_evaluation(data_splitted[3], y_pred, y_pred_prob)
@@ -311,9 +311,9 @@ def main():
                     fig_to_save.append(fig)
                 else:
                     if search_method_choice == 1:
-                        model, score_results = grid_search(model, data_splitted[0], data_splitted[2])
+                        model, score_results = grid_search(model, data_splitted[0], data_splitted[2], "r2")
                     else:
-                        model, score_results = random_search(model, data_splitted[0], data_splitted[2])
+                        model, score_results = random_search(model, data_splitted[0], data_splitted[2], "r2")
                     y_pred = model.predict(data_splitted[1])
                     regression_evaluation = regresion_model_evaluation(data_splitted[3], y_pred)
                     print(regression_evaluation)
@@ -342,7 +342,7 @@ def main():
                         print("First you need to train model")
                 elif save_choice == "4":
                     name = input("\nfilename: ")
-                    save_to_pdf(fig_to_save, results_to_save, name)
+                    save_to_pdf(fig_to_save, name)
         elif main_choice == "0":
             continue
         else:
